@@ -1,0 +1,5 @@
+__pycache__/
+venv/
+test/
+saved_articles/
+saved_articles_kr/

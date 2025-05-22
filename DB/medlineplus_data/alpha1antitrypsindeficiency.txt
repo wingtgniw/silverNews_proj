@@ -1,0 +1,3 @@
+주제: Alpha-1 Antitrypsin Deficiency
+
+오류 발생: HTTPSConnectionPool(host='wsearch.nlm.nih.gov', port=443): Max retries exceeded with url: /ws/query?db=healthTopics&term=title:Alpha-1%20Antitrypsin%20Deficiency (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x000001C968DE8400>: Failed to resolve 'wsearch.nlm.nih.gov' ([Errno 11001] getaddrinfo failed)"))

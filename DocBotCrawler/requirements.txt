@@ -1,0 +1,7 @@
+# Web 크롤링용
+selenium
+
+# 번역기용
+deep-translator
+
+requests

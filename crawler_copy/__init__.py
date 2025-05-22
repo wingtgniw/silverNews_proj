@@ -1,0 +1,1 @@
+from .cnn_crawler import crawl_cnn_articles

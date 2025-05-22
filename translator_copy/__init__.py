@@ -1,0 +1,1 @@
+from .translator import translate_text, kor_to_eng

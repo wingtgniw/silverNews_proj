@@ -1,0 +1,33 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# 환경 설정
+.env
+.venv/
+venv/
+*.env
+
+# OS 특화
+.DS_Store
+Thumbs.db
+
+# IDE 관련
+.vscode/
+.idea/
+
+# 로그 파일
+*.log
+
+# 데이터 파일
+*.db
+*.sqlite3
+
+# 기타
+*.bak
+*.swp
+
+# 크롤링 추출 데이터
+#saved_articles
+saved_articles_kr
