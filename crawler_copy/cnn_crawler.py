@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import NoSuchElementException
 from translator_copy.translator import translate_text  # 번역 모듈
+from webdriver_manager.chrome import ChromeDriverManager    # streamlit 환경에서 사용
 
 # ChromeDriver 경로 설정
 CHROMEDRIVER_PATH = os.path.join(".", "chromedriver-win64", "chromedriver.exe")
@@ -54,7 +55,6 @@ def crawl_cnn_articles(keyword, lang="en"):
     print(f"검색어: {keyword}")
     print(f"언어 설정: {'영문만 저장' if lang == 'en' else '영문 + 한글 번역 저장'}")
 
-    service = Service(executable_path=CHROMEDRIVER_PATH)
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")  # 필요 시 활성화
     options.add_argument("--ignore-certificate-errors")
@@ -64,6 +64,9 @@ def crawl_cnn_articles(keyword, lang="en"):
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-features=IsolateOrigins,site-per-process")
+    
+    service = Service(ChromeDriverManager().install())
+
     driver = webdriver.Chrome(service=service, options=options)
 
     try:

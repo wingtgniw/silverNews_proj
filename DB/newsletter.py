@@ -24,11 +24,8 @@ def insert_newsletter(user_id, title, content_summary, content):
     conn.commit()
     conn.close()
 
-def insert_newsletter_2(user_id, result, rerank=False):
-    if rerank:
-        insert_newsletter_with_reranker(user_id, result)
-    else:
-        insert_newsletter_without_reranker(user_id, result)
+def insert_newsletter_2(user_id, result):
+    insert_newsletter_without_reranker(user_id, result)
 
 def insert_newsletter_without_reranker(user_id, result):
     """
@@ -40,16 +37,15 @@ def insert_newsletter_without_reranker(user_id, result):
     conn = get_db_connection()
     c = conn.cursor()
 
-    title = result["newsletter_title"] if result["newsletter_title"] else ""
-    content_summary = result["newsletter_summary"] if result["newsletter_summary"] else ""
-    content = result["newsletter"] if result["newsletter"] else ""
     crawled_keywords = result["keywords"] if result["keywords"] else ""
     crawled_summary = result["summary"] if result["summary"] else ""
+    content = result["newsletter"] if result["newsletter"] else ""
+    title = result["newsletter_title"] if result["newsletter_title"] else ""
 
     c.execute('''
-        INSERT INTO newsletters (user_id, title, content_summary, content, crawled_keywords, crawled_summary)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (user_id, title, content_summary, content, crawled_keywords, crawled_summary))
+        INSERT INTO newsletters (user_id, title, content, crawled_keywords, crawled_summary)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (user_id, title, content, crawled_keywords, crawled_summary))
 
     conn.commit()
     conn.close()

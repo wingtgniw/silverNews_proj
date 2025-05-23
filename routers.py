@@ -71,6 +71,7 @@ def show_articles():
                     if button:
                         with st.spinner("뉴스레터 작성 중..."):
                             rst = generator.generate_newsletter_from_articles(article)
+                            print(rst)
                         insert_newsletter_2(user_id, rst)
                         st.success("뉴스레터가 작성되었습니다.")
 

@@ -23,7 +23,6 @@ with st.sidebar:
         menu_title="",
         options=["크롤링", "기사", "뉴스레터", "아카이브", "채팅"],
         icons=["search", "newspaper", "envelope", "archive", "chat"],
-        default_index=0,
     )
 
 if menu == "크롤링":
