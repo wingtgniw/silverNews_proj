@@ -6,7 +6,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import NoSuchElementException
-from translator_copy.translator import translate_text  # 번역 모듈
+from ..news_translator.translator import translate_text  # 번역 모듈
+import json
 
 # ChromeDriver 경로 설정
 CHROMEDRIVER_PATH = os.path.join(".", "chromedriver-win64", "chromedriver.exe")
@@ -47,6 +48,18 @@ def save_text_to_file(base_folder, keyword, index, text):
         f.write(text)
 
     print(f"파일 저장 완료: {filepath}")
+
+
+def save_json_to_file(base_folder, keyword, index, data):
+    today = datetime.now().strftime("%Y%m%d")
+    filename = f"{keyword}_{index}_{today}.json"
+    save_folder = os.path.join(".", base_folder)
+    os.makedirs(save_folder, exist_ok=True)
+    filepath = os.path.join(save_folder, filename)
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+    print(f"JSON 파일 저장 완료: {filepath}")
 
 
 def crawl_cnn_articles(keyword, lang="en"):
@@ -92,6 +105,14 @@ def crawl_cnn_articles(keyword, lang="en"):
             click_element(driver, article_xpath)
             time.sleep(3)
 
+             # 기사 URL
+            article_url = driver.current_url
+
+            # 기사 제목
+            title_xpath = "/html/body/div[2]/section[3]/div[2]/div[1]/h1"
+            title = get_element_text_if_exists(driver, title_xpath) or "제목 없음"
+
+            # 본문 수집
             paragraphs = []
             for i in range(1, 50):
                 content_xpath = f"/html/body/div[2]/section[4]/section[1]/section[1]/article/section/main/div[2]/div[1]/p[{i}]"
@@ -105,6 +126,11 @@ def crawl_cnn_articles(keyword, lang="en"):
                 print(f"본문 추출 완료: {len(paragraphs)}개 단락")
                 full_text = "\n\n".join(paragraphs)
                 filename_keyword = f"cnn_{keyword.replace(' ', '_')}"
+                json_data = {
+                    "title": title,
+                    "url": article_url,
+                    "content_en": full_text,
+                }
 
                 # 영어 원문 저장
                 save_text_to_file(base_folder="saved_articles", keyword=filename_keyword, index=index, text=full_text)
@@ -114,6 +140,8 @@ def crawl_cnn_articles(keyword, lang="en"):
                     translated_text = translate_text(full_text)
                     print(f"번역된 텍스트: {translated_text[:100]}...")  # 번역된 결과 앞 100자 미리보기
                     save_text_to_file(base_folder="saved_articles_kr", keyword=filename_keyword, index=index, text=translated_text)
+        
+                save_json_to_file(base_folder="saved_articles_json", keyword=filename_keyword, index=index, data=json_data)
 
             else:
                 print(f"본문이 없습니다. 기사 {index} 건너뜀.")
