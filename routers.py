@@ -1,7 +1,9 @@
 import streamlit as st
 from DB import *
-from crawler_copy import crawl_cnn_articles
-from translator_copy import kor_to_eng
+from DocBotCrawler.run_crawler import NewsCrawlerRunner
+#from crawler_copy import crawl_cnn_articles
+#from translator_copy import kor_to_eng
+from DocBotCrawler.news_translator.translator import kor_to_eng
 from glob import glob
 import re
 import time
@@ -35,7 +37,9 @@ def crawling_articles_page():
 
             start_time = time.time()
             ## cnn 사이트로부터 기사 크롤링, 번역 및 저장
-            crawl_cnn_articles(keyword)
+            #crawl_cnn_articles(keyword)
+            crawler = NewsCrawlerRunner()
+            crawler.run(keyword, lang="en")
             st.write(f'crawl time: {time.time() - start_time}')
 
         st.success("기사들이 크롤링 되었습니다.")

@@ -1,7 +1,7 @@
 from crawler.cnn_crawler import crawl_cnn_articles
 from crawler.usatoday_crawler import crawl_usatoday_articles
 from crawler.wikipedia_crawler import crawl_wikipedia
-from translator.translator import kor_to_eng
+from news_translator.translator import kor_to_eng
 import re
 from concurrent.futures import ThreadPoolExecutor
 

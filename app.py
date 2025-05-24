@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
 import streamlit as st
 from streamlit_option_menu import option_menu
 from DB import init_db
