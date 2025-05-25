@@ -7,6 +7,7 @@ from streamlit_option_menu import option_menu
 from DB import init_db
 from generator import NewsletterGenerator, ArticleEditor
 from routers import show_articles, crawling_articles_page, newsletter_page
+from streamlit_page.chat_page import chat_page
 from RAG import reranker_qa
 # from fact_checker import agent
 
@@ -39,5 +40,5 @@ elif menu == "아카이브":
     # archive_page()
     st.write("아카이브")
 elif menu == "채팅":
-    # chat_page()
-    st.write("채팅")
+    chat_page()
+    #st.write("채팅")
