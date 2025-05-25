@@ -12,3 +12,4 @@ saved_articles_json/
 .env
 
 
+git commit -m "refactor: unify news crawling call structure to use run_crawler.py" -m "Updated ChromeDriver path to use absolute resolution for Streamlit compatibility." -m "feature: add json file for saved articles"
