@@ -1,10 +1,8 @@
 import streamlit as st
 from DB import *
-from DocBotCrawler.run_crawler import NewsCrawlerRunner
-#from crawler_copy import crawl_cnn_articles
-#from translator_copy import kor_to_eng
 from DocBotCrawler.news_translator.translator import kor_to_eng
 from glob import glob
+import json
 import re
 import time
 from datetime import datetime
@@ -36,61 +34,59 @@ def crawling_articles_page():
             st.write(f'translate time: {time.time() - start_time}')
 
             start_time = time.time()
-            ## cnn 사이트로부터 기사 크롤링, 번역 및 저장
-            #crawl_cnn_articles(keyword)
-            crawler = NewsCrawlerRunner()
-            crawler.run(keyword, lang="en")
-            st.write(f'crawl time: {time.time() - start_time}')
+            st.session_state["crawler"].run(keyword, lang="kr")
+            st.write(f'crawl time: {time.time() - start_time}') # only eng = 약 96초, with kr = 약 430초
 
         st.success("기사들이 크롤링 되었습니다.")
 
 def show_articles():
-    files = glob(f"./saved_articles/*.txt")
+    files = glob(f"./saved_articles_json/*.json")
     if st.session_state.get("articles") is None :
         st.session_state["articles"] = []
 
     generator = st.session_state['newsletter_generator']
-    article_editor = st.session_state['article_editor']
     user_id = st.session_state["user_id"]
         
     if files:
         # chat gpt turbo 3.5 모델 사용
         if len(st.session_state["articles"]) == 0:
             for i, file in enumerate(files):
-                # 기사 내용 추출
+                if "usatoday" not in file:
+                    continue
                 with open(file, "r", encoding="utf-8") as f:
-                    article = f.read()
-            
-                # 기사 편집
-                result = article_editor.generate_newsletter_from_articles(article)
-                # with st.expander(f"{article['title']} ({article['created_at']})"):
-                with st.expander(result['translation_title']):
+                    article = json.load(f)
+                
+                # st.write(article['title'])
+                with st.expander(article['title']):
                     button = st.button("뉴스레터 작성", key=f"button_{i}")
-                    
-                    st.write("번역 요약:")
-                    st.write(result['translation_summary'])
-                    st.write("기사 번역:")
-                    st.write(result['translation'])
 
                     if button:
                         with st.spinner("뉴스레터 작성 중..."):
-                            rst = generator.generate_newsletter_from_articles(article)
+                            rst = generator.generate_newsletter_from_articles(article['content_en'])
                             print(rst)
                         insert_newsletter_2(user_id, rst)
                         st.success("뉴스레터가 작성되었습니다.")
 
-                st.session_state["articles"].append([article, result['translation_title'], result['translation_summary']])
+                    st.write("기사 링크:")
+                    st.write(article['url'])
+                    st.write("기사 내용:")
+                    st.write(article['content_kr'])
+
+
+                st.session_state["articles"].append(article)
         else:
-            for i, (article, title, summary) in enumerate(st.session_state["articles"]):
-                with st.expander(title):
+            for i, article in enumerate(st.session_state["articles"]):
+                with st.expander(article['title']):
                     button = st.button("뉴스레터 작성", key=f"button_{i}")
 
-                    st.write(f"요약:\n{summary}")
-                    st.write(f"기사:\n{article}")
+                    st.write("기사 링크:")
+                    st.write(article['url'])
+                    st.write("기사 내용:")
+                    st.write(article['content_kr'])
 
                     if button:
                         with st.spinner("뉴스레터 작성 중..."):
-                            rst = generator.generate_newsletter_from_articles(article)
+                            rst = generator.generate_newsletter_from_articles(article['content_en'])
                         insert_newsletter_2(user_id, rst)
                         st.success("뉴스레터가 작성되었습니다.")
     else:
@@ -106,8 +102,12 @@ def newsletter_page():
             with st.expander(f"{newsletter['title']} ({newsletter['created_at']})"):
                 button = st.button("메일 발송", key=f"button_{i}")
                 
-                st.write(f"키워드:\n{newsletter['crawled_keywords']}")
-                st.write(f"뉴스레터 내용:\n{newsletter['content']}")
+                st.markdown("---")
+                st.write("키워드:")
+                st.write(newsletter['crawled_keywords'])
+                st.markdown("---")
+                st.write("뉴스레터 내용:")
+                st.write(newsletter['content'])
 
                 if button:
                     st.error("미구현")

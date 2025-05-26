@@ -33,7 +33,7 @@ class NewsletterGenerator:
         ### input : articles
         ### output : keywords
         def generate_keywords(state):
-            prompt = role + """다음 내용들은 키워드를 검색해서 모아찾은 기사야. 잘 읽어보고 키워드들을 한글로 정리해줘.
+            prompt = role + """다음 내용들은 키워드를 검색해서 모아찾은 기사야. 잘 읽어보고 키워드 10개를 한글로 정리해줘.
             기사 내용: """ + state["article"] + "\n기사 키워드:"
             result = llm.invoke(prompt)
             return {"keywords": result.content}
@@ -42,7 +42,7 @@ class NewsletterGenerator:
         ### input : articles, keywords
         ### output : summary
         def generate_summary(state):
-            prompt = role + """다음 내용들을 확인해서 기사를 요약해줘.
+            prompt = role + """다음 내용들을 확인해서 기사 3개의 문단으로 요약해줘.
             기사 내용: """ + state["article"] + "\n기사 키워드: " + state["keywords"] + "\n기사 요약:"
             result = llm.invoke(prompt)
             return {"summary": result.content}
