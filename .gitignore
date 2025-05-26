@@ -2,10 +2,13 @@ __pycache__/
 venv/
 test/
 
+# DB
+/DB/silverNews.db
+
 #saved articles file
-saved_articles/
-saved_articles_kr/
-saved_articles_json/
+/saved_articles/
+/saved_articles_kr/
+/saved_articles_json/
 
 
 #env

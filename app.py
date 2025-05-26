@@ -5,27 +5,9 @@ load_dotenv()
 import streamlit as st
 from streamlit_option_menu import option_menu
 from DB import init_db
-from generator import NewsletterGenerator, ArticleEditor
 from routers import show_articles, crawling_articles_page, newsletter_page
 from streamlit_page.chat_page import chat_page
-from RAG import RAG_reviewer
-from DocBotCrawler.run_crawler import NewsCrawlerRunner
 # from fact_checker import agent
-
-if st.session_state.get("newsletter_generator") is None:
-    # 뉴스레터 생성기 초기화
-    st.session_state["newsletter_generator"] = NewsletterGenerator()
-    # 이메일 정보 초기화
-    st.session_state["sender_email"] = "wingtgniw@gmail.com"
-    st.session_state["email_password"] = os.getenv("EMAIL_PASSWORD")
-    
-    st.session_state["receiver_email"] = "wingtgniw@gmail.com"
-    # 기사 편집기 초기화
-    st.session_state["article_editor"] = ArticleEditor()
-    # 크롤러 초기화
-    st.session_state["crawler"] = NewsCrawlerRunner()
-    # RAG 초기화
-    st.session_state["RAG_reviewer"] = RAG_reviewer()
 
 # 데이터베이스 초기화
 if st.session_state.get("DB") is None:
@@ -34,11 +16,16 @@ if st.session_state.get("DB") is None:
     st.session_state["use_reranker"] = True
     # st.session_state["fact_checker"] = agent
 
+# URL 파라미터 확인
+if "id" in st.query_params:
+    st.session_state["menu"] = "뉴스레터"
+
 with st.sidebar:
     menu = option_menu(
         menu_title="",
         options=["크롤링", "기사", "뉴스레터", "아카이브", "채팅"],
         icons=["search", "newspaper", "envelope", "archive", "chat"],
+        default_index=["크롤링", "기사", "뉴스레터", "아카이브", "채팅"].index(st.session_state.get("menu", "크롤링"))
     )
 
 if menu == "크롤링":

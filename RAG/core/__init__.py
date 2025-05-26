@@ -50,9 +50,9 @@ class RAG_reviewer:
     
     def get_review(self, newsletter):
         print(f"RAG get_review")
-        # print(f"RAG newsletter: {newsletter}")
+        # print(f"RAG ---- newsletter: {newsletter}")
 
-        print(f"RAG get_reranked_results")
+        print(f"RAG ---- get_reranked_results")
         reranked_results = self.get_reranked_results(newsletter)
 
         average_score = 0
@@ -60,14 +60,14 @@ class RAG_reviewer:
             average_score += doc.metadata['relevance_score']
         
         average_score /= len(reranked_results)
-        print(f"RAG average_score: {average_score}")
+        print(f"RAG ---- average_score: {average_score}")
 
         prompt = """
         다음 내용들을 확인해서 뉴스레터 내용에 대한 사실 여부를 확인해줘.
         뉴스레터 내용: """ + newsletter + "\n뉴스레터 리뷰:"
         result = self.QA.invoke(prompt)
 
-        print(f"RAG result: {result}")
+        # print(f"RAG ---- result: {result}")
 
         return average_score, result['result']
     
