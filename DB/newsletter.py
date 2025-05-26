@@ -128,3 +128,26 @@ def delete_newsletter(id):
 
     conn.commit()
     conn.close()
+
+
+
+def get_newsletter_keywords_by_id(id):
+    """
+    뉴스레터의 키워드(crawled_keywords)만 조회
+    args:
+        id: 뉴스레터 아이디
+
+    return:
+        crawled_keywords (str) 또는 None
+    """
+    conn = get_db_connection()
+    c = conn.cursor()
+
+    c.execute('''
+        SELECT crawled_keywords FROM newsletters WHERE id = ?
+    ''', (id,))
+    
+    result = c.fetchone()
+    conn.close()
+
+    return result[0] if result else None
