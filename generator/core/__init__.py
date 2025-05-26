@@ -11,7 +11,7 @@ class NewsletterGenerator:
         ## only crawling 뉴스레터 생성 그래프
         self.newsletter_graph = self.get_newsletter_graph()
 
-    def generate_newsletter_from_articles(self, article):
+    def generate_newsletter_from_article(self, article):
         return self.newsletter_graph.invoke({"article":article})
     
     def get_newsletter_graph(self):
@@ -25,6 +25,7 @@ class NewsletterGenerator:
         class MyState(dict):
             article: str
             keywords: str
+            keywords_kr: str
             summary: str
             newsletter: str
             newsletter_title: str
@@ -33,16 +34,21 @@ class NewsletterGenerator:
         ### input : articles
         ### output : keywords
         def generate_keywords(state):
-            prompt = role + """다음 내용들은 키워드를 검색해서 모아찾은 기사야. 잘 읽어보고 키워드 10개를 한글로 정리해줘.
+            prompt = role + """다음 내용들은 키워드를 검색해서 모아찾은 기사야. 잘 읽어보고 키워드 10개를 정리해줘.
             기사 내용: """ + state["article"] + "\n기사 키워드:"
             result = llm.invoke(prompt)
             return {"keywords": result.content}
         
+        def translate_keywords(state):
+            prompt = "다음 키워드들을 한글로 번역해줘." + state["keywords"] + "\n한글 키워드:"
+            result = llm.invoke(prompt)
+            return {"keywords_kr": result.content}
+
         ## articles to summary
         ### input : articles, keywords
         ### output : summary
         def generate_summary(state):
-            prompt = role + """다음 내용들을 확인해서 기사 3개의 문단으로 요약해줘.
+            prompt = role + """다음 내용들을 확인해서 기사 내용을 3개의 문단으로 요약해줘.
             기사 내용: """ + state["article"] + "\n기사 키워드: " + state["keywords"] + "\n기사 요약:"
             result = llm.invoke(prompt)
             return {"summary": result.content}
@@ -68,11 +74,13 @@ class NewsletterGenerator:
         ## 그래프 만들기
         graph = StateGraph(MyState)
         graph.add_node("키워드 생성", RunnableLambda(generate_keywords))
+        graph.add_node("키워드 번역", RunnableLambda(translate_keywords))
         graph.add_node("기사 요약", RunnableLambda(generate_summary))
         graph.add_node("뉴스레터 생성", RunnableLambda(generate_newsletter))
         graph.add_node("뉴스레터 제목 생성", RunnableLambda(generate_newsletter_title))
 
         graph.set_entry_point("키워드 생성")
+        graph.add_edge("키워드 생성", "키워드 번역")
         graph.add_edge("키워드 생성", "기사 요약")
         graph.add_edge("기사 요약", "뉴스레터 생성")
         graph.add_edge("뉴스레터 생성", "뉴스레터 제목 생성")

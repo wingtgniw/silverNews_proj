@@ -39,7 +39,7 @@ def crawling_articles_page():
 
         st.success("기사들이 크롤링 되었습니다.")
 
-def show_articles():
+def show_articles_session():
     files = glob(f"./saved_articles_json/*.json")
     if st.session_state.get("articles") is None :
         st.session_state["articles"] = []
@@ -62,12 +62,15 @@ def show_articles():
 
                     if button:
                         with st.spinner("뉴스레터 작성 중..."):
-                            rst = generator.generate_newsletter_from_articles(article['content_en'])
-                            print(rst)
-                        insert_newsletter_2(user_id, rst)
+                            rst = generator.generate_newsletter_from_article(article['content_en'])
+                            RAG_rst = st.session_state["RAG_reviewer"].get_review(rst['newsletter'])
+                        
+                        print(RAG_rst)
+                        
+                        insert_newsletter(user_id, rst)
                         st.success("뉴스레터가 작성되었습니다.")
 
-                    st.write("기사 링크:")
+                    st.write("원문:")
                     st.write(article['url'])
                     st.write("기사 내용:")
                     st.write(article['content_kr'])
@@ -79,16 +82,53 @@ def show_articles():
                 with st.expander(article['title']):
                     button = st.button("뉴스레터 작성", key=f"button_{i}")
 
-                    st.write("기사 링크:")
+                    st.write("원문:")
                     st.write(article['url'])
                     st.write("기사 내용:")
                     st.write(article['content_kr'])
 
                     if button:
                         with st.spinner("뉴스레터 작성 중..."):
-                            rst = generator.generate_newsletter_from_articles(article['content_en'])
-                        insert_newsletter_2(user_id, rst)
+                            rst = generator.generate_newsletter_from_article(article['content_en'])
+                            RAG_rst = st.session_state["RAG_reviewer"].get_review(rst['newsletter'])
+
+                        print(RAG_rst)
+                        insert_newsletter(user_id, rst)
                         st.success("뉴스레터가 작성되었습니다.")
+    else:
+        st.info("아직 크롤링된 기사가 없습니다.")
+
+def show_articles():
+    files = glob(f"./saved_articles_json/*.json")
+
+    generator = st.session_state['newsletter_generator']
+    user_id = st.session_state["user_id"]
+        
+    if files:
+        # chat gpt turbo 3.5 모델 사용
+        for i, file in enumerate(files):
+            if "usatoday" not in file:
+                continue
+            with open(file, "r", encoding="utf-8") as f:
+                article = json.load(f)
+            
+            # st.write(article['title'])
+            with st.expander(article['title']):
+                button = st.button("뉴스레터 작성", key=f"button_{i}")
+
+                if button:
+                    with st.spinner("뉴스레터 작성 중..."):
+                        newsletter_rst = generator.generate_newsletter_from_article(article['content_en'])
+                        RAG_rst = st.session_state["RAG_reviewer"].get_review(newsletter_rst['newsletter'])
+                    
+                    insert_newsletter(user_id, newsletter_rst, RAG_rst)
+                    st.success("뉴스레터가 작성되었습니다.")
+
+                st.write("원문:")
+                st.write(article['url'])
+                st.write("기사 내용:")
+                st.write(article['content_kr'])
+
     else:
         st.info("아직 크롤링된 기사가 없습니다.")
 
@@ -108,6 +148,15 @@ def newsletter_page():
                 st.markdown("---")
                 st.write("뉴스레터 내용:")
                 st.write(newsletter['content'])
+                st.markdown("---")
+                st.write("RAG 결과:")
+                st.write("점수: {:.2f}%".format(newsletter['r_score']*100))
+                st.write("결과:")
+                if newsletter['r_score'] <= 0.6:
+                    st.warning("데이터 베이스와 연관성이 적은 뉴스레터입니다.")
+                else:
+                    st.success("데이터 베이스와 연관성이 높은 뉴스레터입니다.")
+
 
                 if button:
                     st.error("미구현")

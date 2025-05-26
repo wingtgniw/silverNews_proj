@@ -16,6 +16,8 @@ def init_newsletter_db():
             content TEXT NOT NULL,
             crawled_keywords TEXT,
             crawled_summary TEXT,
+            r_score REAL,
+            r_result TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )

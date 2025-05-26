@@ -1,1 +1,1 @@
-from .core import reranker_qa
+from .core import RAG_reviewer

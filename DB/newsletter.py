@@ -1,33 +1,6 @@
 from .common import get_db_connection
 
-def insert_newsletter(user_id, title, content_summary, content):
-    """
-    뉴스레터 페이지 DB 입력
-    args:
-        user_id: 유저 아이디
-        title: 뉴스레터 제목
-        content_summary: 뉴스레터 요약
-        content: 뉴스레터 내용
-    
-    return:
-        None
-    """
-
-    conn = get_db_connection()
-    c = conn.cursor()
-
-    c.execute('''
-        INSERT INTO newsletters (user_id, title, content_summary, content, crawled_keywords, crawled_summary)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (user_id, title, content_summary, content, 'empty', 'empty'))
-
-    conn.commit()
-    conn.close()
-
-def insert_newsletter_2(user_id, result):
-    insert_newsletter_without_reranker(user_id, result)
-
-def insert_newsletter_without_reranker(user_id, result):
+def insert_newsletter(user_id, result, RAG_rst):
     """
     크롤링 뉴스레터 페이지 DB 입력
     args:
@@ -37,15 +10,15 @@ def insert_newsletter_without_reranker(user_id, result):
     conn = get_db_connection()
     c = conn.cursor()
 
-    crawled_keywords = result["keywords"] if result["keywords"] else ""
+    crawled_keywords = result["keywords_kr"] if result["keywords_kr"] else ""
     crawled_summary = result["summary"] if result["summary"] else ""
     content = result["newsletter"] if result["newsletter"] else ""
     title = result["newsletter_title"] if result["newsletter_title"] else ""
 
     c.execute('''
-        INSERT INTO newsletters (user_id, title, content, crawled_keywords, crawled_summary)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (user_id, title, content, crawled_keywords, crawled_summary))
+        INSERT INTO newsletters (user_id, title, content, crawled_keywords, crawled_summary, r_score, r_result)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ''', (user_id, title, content, crawled_keywords, crawled_summary, RAG_rst[0], RAG_rst[1]))
 
     conn.commit()
     conn.close()

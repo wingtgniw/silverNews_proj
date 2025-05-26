@@ -8,18 +8,20 @@ from DB import init_db
 from generator import NewsletterGenerator, ArticleEditor
 from routers import show_articles, crawling_articles_page, newsletter_page
 from streamlit_page.chat_page import chat_page
-from RAG import reranker_qa
+from RAG import RAG_reviewer
 from DocBotCrawler.run_crawler import NewsCrawlerRunner
 # from fact_checker import agent
 
 if st.session_state.get("newsletter_generator") is None:
-    with st.spinner("뉴스레터 생성기 초기화 중..."):
-        st.session_state["newsletter_generator"] = NewsletterGenerator()
-        st.session_state["user_id"] = "wingtgniw@gmail.com"
-    with st.spinner("기사 편집기 초기화 중..."):
-        st.session_state["article_editor"] = ArticleEditor()
-    with st.spinner("크롤러 초기화 중..."):
-        st.session_state["crawler"] = NewsCrawlerRunner()
+    # 뉴스레터 생성기 초기화
+    st.session_state["newsletter_generator"] = NewsletterGenerator()
+    st.session_state["user_id"] = "wingtgniw@gmail.com"
+    # 기사 편집기 초기화
+    st.session_state["article_editor"] = ArticleEditor()
+    # 크롤러 초기화
+    st.session_state["crawler"] = NewsCrawlerRunner()
+    # RAG 초기화
+    st.session_state["RAG_reviewer"] = RAG_reviewer()
 
 # 데이터베이스 초기화
 if st.session_state.get("DB") is None:
