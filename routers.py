@@ -6,6 +6,10 @@ import json
 import re
 import time
 from datetime import datetime
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import os
 
 def is_korean(text):
     return bool(re.search(r"[가-힣]", text))
@@ -140,6 +144,7 @@ def newsletter_page():
     if newsletters:
         for i, newsletter in enumerate(newsletters):
             with st.expander(f"{newsletter['title']} ({newsletter['created_at']})"):
+                receiver_email = st.text_input("받으실 분 이메일", key=f"receiver_email_{i}")
                 button = st.button("메일 발송", key=f"button_{i}")
                 
                 st.markdown("---")
@@ -159,10 +164,29 @@ def newsletter_page():
 
 
                 if button:
-                    st.error("미구현")
-                #     delete_newsletter(newsletter['id'])
-                #     st.success("뉴스레터가 삭제되었습니다.")
+                    with st.spinner("전송중..."):
+                        st.session_state["send_email"](newsletter['title'], newsletter['content'], receiver_email)
+                        st.success("전송완료")
+                elif receiver_email is None:
+                    st.error("수신자를 입력해주세요.")
 
     else:
         st.info("뉴스레터가 없습니다.")
+
+def send_email(title, content, receiver_email):
+    sender_email = st.session_state["sender_email"]
+    password = st.session_state["email_password"]
+
+    msg = MIMEMultipart()
+    msg["Subject"] = title
+    msg["From"] = sender_email
+    msg["To"] = receiver_email
+    msg.attach( MIMEText(content, "plain") )
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, msg.as_string())
+
+    st.session_state["send_email"] = send_email
+
 

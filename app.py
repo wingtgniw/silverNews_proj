@@ -15,7 +15,11 @@ from DocBotCrawler.run_crawler import NewsCrawlerRunner
 if st.session_state.get("newsletter_generator") is None:
     # 뉴스레터 생성기 초기화
     st.session_state["newsletter_generator"] = NewsletterGenerator()
-    st.session_state["user_id"] = "wingtgniw@gmail.com"
+    # 이메일 정보 초기화
+    st.session_state["sender_email"] = "wingtgniw@gmail.com"
+    st.session_state["email_password"] = os.getenv("EMAIL_PASSWORD")
+    
+    st.session_state["receiver_email"] = "wingtgniw@gmail.com"
     # 기사 편집기 초기화
     st.session_state["article_editor"] = ArticleEditor()
     # 크롤러 초기화
