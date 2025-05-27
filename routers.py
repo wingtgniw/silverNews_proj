@@ -2,7 +2,8 @@ import streamlit as st
 from DB import *
 from DocBotCrawler.news_translator.translator import kor_to_eng
 from generator import NewsletterGenerator
-from RAG import RAG_reviewer
+from RAG import RAGReviewer
+from agent import AgentReviewer
 from DocBotCrawler.run_crawler import NewsCrawlerRunner
 from glob import glob
 import json
@@ -62,7 +63,11 @@ def show_articles():
 
     if st.session_state.get("RAG_reviewer") is None:
         # RAG 리뷰어 초기화
-        st.session_state["RAG_reviewer"] = RAG_reviewer()
+        st.session_state["RAG_reviewer"] = RAGReviewer()
+
+    if st.session_state.get("agent_reviewer") is None:
+        # 에이전트 리뷰어 초기화
+        st.session_state["agent_reviewer"] = AgentReviewer()
 
     files = glob(f"./saved_articles_json/*.json")
 
@@ -85,8 +90,11 @@ def show_articles():
                     with st.spinner("뉴스레터 작성 중..."):
                         newsletter_rst = generator.generate_newsletter_from_article(article['content_en'])
                         RAG_rst = st.session_state["RAG_reviewer"].get_review(newsletter_rst['newsletter'])
-                    
-                    insert_newsletter(user_id, newsletter_rst, RAG_rst)
+                        agent_rst = st.session_state["agent_reviewer"].get_review(newsletter_rst['newsletter'])
+                        # st.write(f"RAG 결과: {RAG_rst}")
+                        st.write(f"Agent 결과: {agent_rst}")
+
+                    insert_newsletter(user_id, newsletter_rst, RAG_rst, agent_rst)
                     st.success("뉴스레터가 작성되었습니다.")
 
                 st.write("원문:")
@@ -190,9 +198,15 @@ def newsletter_expanded_page(newsletter):
     st.write(newsletter['content'])
     st.markdown("---")
     st.write("RAG 결과:")
-    st.write("점수: {:.2f}%".format(newsletter['r_score']*100))
+    st.write("점수: {:.2f}".format(newsletter['r_score']*100))
     st.write("결과:")
     if newsletter['r_score'] <= 0.6:
         st.warning("데이터 베이스와 연관성이 적은 뉴스레터입니다.")
     else:
         st.success("데이터 베이스와 연관성이 높은 뉴스레터입니다.")
+    st.markdown("---")
+    st.write("에이전트 결과:")
+    st.write("점수: {:.2f}".format(newsletter['a_score']*100))
+    st.write("결과:")
+    if newsletter['a_score'] <= 0.6:
+        st.warning("데이터 베이스와 연관성이 적은 뉴스레터입니다.")

@@ -1,6 +1,6 @@
 from .common import get_db_connection
 
-def insert_newsletter(user_id, result, RAG_rst):
+def insert_newsletter(user_id, result, RAG_rst, agent_rst):
     """
     크롤링 뉴스레터 페이지 DB 입력
     args:
@@ -17,9 +17,9 @@ def insert_newsletter(user_id, result, RAG_rst):
     title = result["newsletter_title"] if result["newsletter_title"] else ""
 
     c.execute('''
-        INSERT INTO newsletters (user_id, title, content, content_summary, crawled_keywords, crawled_summary, r_score, r_result)
+        INSERT INTO newsletters (user_id, title, content, content_summary, crawled_keywords, crawled_summary, r_score, a_score)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (user_id, title, content, content_summary, crawled_keywords, crawled_summary, RAG_rst[0], RAG_rst[1]))
+    ''', (user_id, title, content, content_summary, crawled_keywords, crawled_summary, RAG_rst, agent_rst))
 
     conn.commit()
     conn.close()

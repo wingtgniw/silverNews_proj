@@ -18,7 +18,7 @@ def init_newsletter_db():
             crawled_keywords TEXT,
             crawled_summary TEXT,
             r_score REAL,
-            r_result TEXT,
+            a_score REAL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
