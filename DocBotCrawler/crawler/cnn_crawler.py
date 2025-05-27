@@ -66,6 +66,7 @@ def crawl_cnn_articles(keyword, lang="en"):
     print("CNN Health 기사 크롤링 시작...")
     print(f"검색어: {keyword}")
     print(f"언어 설정: {'영문만 저장' if lang == 'en' else '영문 + 한글 번역 저장'}")
+    translated = None
 
     service = Service(executable_path=CHROMEDRIVER_PATH)
     options = webdriver.ChromeOptions()
@@ -126,22 +127,28 @@ def crawl_cnn_articles(keyword, lang="en"):
                 print(f"본문 추출 완료: {len(paragraphs)}개 단락")
                 full_text = "\n\n".join(paragraphs)
                 filename_keyword = f"cnn_{keyword.replace(' ', '_')}"
-                json_data = {
-                    "title": title,
-                    "url": article_url,
-                    "content_en": full_text,
-                }
 
-                # 영어 원문 저장
-                save_text_to_file(base_folder="saved_articles", keyword=filename_keyword, index=index, text=full_text)
-
-                # 번역 후 한국어 저장
                 if lang == "kr":
-                    translated_text = translate_text(full_text)
-                    print(f"번역된 텍스트: {translated_text[:100]}...")  # 번역된 결과 앞 100자 미리보기
-                    save_text_to_file(base_folder="saved_articles_kr", keyword=filename_keyword, index=index, text=translated_text)
-        
-                save_json_to_file(base_folder="saved_articles_json", keyword=filename_keyword, index=index, data=json_data)
+                    translated = translate_text(full_text)
+                    save_text_to_file("saved_articles_kr", filename_keyword, index, translated)
+
+                    # JSON 저장
+                    json_data = {
+                        "title": title,
+                        "url": article_url,
+                        "content_en": full_text,
+                        "content_kr": translated  # lang이 kr일 때만 추가
+                    }
+                else:
+                    # JSON 저장 (영문만)
+                    json_data = {
+                        "title": title,
+                        "url": article_url,
+                        "content_en": full_text
+                    }
+
+                save_json_to_file("saved_articles_json", filename_keyword, index, json_data)
+
 
             else:
                 print(f"본문이 없습니다. 기사 {index} 건너뜀.")

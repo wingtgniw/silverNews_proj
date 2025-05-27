@@ -5,7 +5,7 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import quote_plus
-from ..news_translator.translator import translate_text  # 번역 모듈
+from ..news_translator.translator import translate_text
 import json
 
 BASE_URL = "https://www.usatoday.com"
@@ -26,7 +26,6 @@ def save_text_to_file(base_folder, keyword, index, text):
     print(f"저장 완료: {filepath}")
 
 
-
 def save_json_to_file(base_folder, keyword, index, data):
     today = datetime.now().strftime("%Y%m%d")
     filename = f"{keyword}_{index}_{today}.json"
@@ -41,6 +40,7 @@ def save_json_to_file(base_folder, keyword, index, data):
 
 def crawl_usatoday_articles(keyword, lang="en"):
     print(f"USA Today 기사 크롤링 시작: '{keyword}' / 언어: {lang}")
+    print(f"언어 설정: {'영문만 저장' if lang == 'en' else '영문 + 한글 번역 저장'}")
 
     encoded_keyword = quote_plus(keyword)
     search_url = f"{BASE_URL}/search/?q={encoded_keyword}"
@@ -87,23 +87,24 @@ def crawl_usatoday_articles(keyword, lang="en"):
                 title = title_tag.get_text(strip=True) if title_tag else "제목 없음"
                 filename_keyword = f"usatoday_{keyword.replace(' ', '_')}"
 
-                # 텍스트 파일 저장 (기존 함수 유지)
                 save_text_to_file("saved_articles", filename_keyword, index, full_text)
 
                 if lang == "kr":
                     translated = translate_text(full_text)
                     save_text_to_file("saved_articles_kr", filename_keyword, index, translated)
-                else:
-                    translated = None
 
-                # JSON 저장
-                json_data = {
-                    "title": title,
-                    "url": article_url,
-                    "content_en": full_text
-                }
-                if translated:
-                    json_data["content_kr"] = translated
+                    json_data = {
+                        "title": title,
+                        "url": article_url,
+                        "content_en": full_text,
+                        "content_kr": translated
+                    }
+                else:
+                    json_data = {
+                        "title": title,
+                        "url": article_url,
+                        "content_en": full_text
+                    }
 
                 save_json_to_file("saved_articles_json", filename_keyword, index, json_data)
 
