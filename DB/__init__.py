@@ -14,6 +14,7 @@ def init_newsletter_db():
             user_id INTEGER NOT NULL,
             title TEXT NOT NULL,
             content TEXT NOT NULL,
+            content_summary TEXT,
             crawled_keywords TEXT,
             crawled_summary TEXT,
             r_score REAL,

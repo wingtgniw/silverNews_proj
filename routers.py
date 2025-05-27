@@ -150,14 +150,18 @@ def newsletter_page():
                         msg["From"] = sender_email
                         msg["To"] = receiver_email
                         
-                        # 뉴스레터 링크 수정
-                        base_url = os.getenv("BASE_URL", "http://localhost:8501")
-                        newsletter_link = f"{base_url}/?menu=뉴스레터&id={newsletter['id']}"
-                        
-                        content = "Silver News에서 " + "\"" + newsletter['title'] + "\"" + "라는 제목으로 뉴스레터가 작성되었습니다." + "\n\n자세한 기사는 아래의 링크를 클릭해주세요:\n"
+                        # 메일 내용 작성
+                        content = newsletter['title']\
+                        + "\n\n" + newsletter['content_summary']\
+                        + "\n\n자세한 기사는 아래의 링크를 클릭해주세요:\n"
                         content_part = MIMEText(content, "plain")
                         msg.attach(content_part)
 
+                        # 뉴스레터 링크 수정
+                        base_url = os.getenv("BASE_URL", "http://192.168.0.166:8501")
+                        newsletter_link = f"{base_url}/?menu=뉴스레터&id={newsletter['id']}"
+
+                        # 메일 내용에 링크 삽입
                         link = f'<a href="{newsletter_link}">뉴스레터 보기</a>'
                         link_part = MIMEText(link, "html") 
                         msg.attach(link_part)

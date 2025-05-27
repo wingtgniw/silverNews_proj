@@ -13,12 +13,13 @@ def insert_newsletter(user_id, result, RAG_rst):
     crawled_keywords = result["keywords_kr"] if result["keywords_kr"] else ""
     crawled_summary = result["summary"] if result["summary"] else ""
     content = result["newsletter"] if result["newsletter"] else ""
+    content_summary = result["newsletter_summary"] if result["newsletter_summary"] else ""
     title = result["newsletter_title"] if result["newsletter_title"] else ""
 
     c.execute('''
-        INSERT INTO newsletters (user_id, title, content, crawled_keywords, crawled_summary, r_score, r_result)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', (user_id, title, content, crawled_keywords, crawled_summary, RAG_rst[0], RAG_rst[1]))
+        INSERT INTO newsletters (user_id, title, content, content_summary, crawled_keywords, crawled_summary, r_score, r_result)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (user_id, title, content, content_summary, crawled_keywords, crawled_summary, RAG_rst[0], RAG_rst[1]))
 
     conn.commit()
     conn.close()
