@@ -198,15 +198,15 @@ def newsletter_expanded_page(newsletter):
     st.write(newsletter['content'])
     st.markdown("---")
     st.write("RAG 결과:")
-    st.write("점수: {:.2f}".format(newsletter['r_score']*100))
-    st.write("결과:")
+    st.write("점수: {}".format(newsletter['r_score']))
     if newsletter['r_score'] <= 0.6:
         st.warning("데이터 베이스와 연관성이 적은 뉴스레터입니다.")
     else:
         st.success("데이터 베이스와 연관성이 높은 뉴스레터입니다.")
     st.markdown("---")
     st.write("에이전트 결과:")
-    st.write("점수: {:.2f}".format(newsletter['a_score']*100))
-    st.write("결과:")
+    st.write("점수: {}".format(newsletter['a_score']))
     if newsletter['a_score'] <= 0.6:
-        st.warning("데이터 베이스와 연관성이 적은 뉴스레터입니다.")
+        st.warning("wikipedia 정보와 연관성이 적은 뉴스레터입니다.")
+    else:
+        st.success("wikipedia 정보와 연관성이 높은 뉴스레터입니다.")

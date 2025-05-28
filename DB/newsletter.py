@@ -19,7 +19,7 @@ def insert_newsletter(user_id, result, RAG_rst, agent_rst):
     c.execute('''
         INSERT INTO newsletters (user_id, title, content, content_summary, crawled_keywords, crawled_summary, r_score, a_score)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (user_id, title, content, content_summary, crawled_keywords, crawled_summary, RAG_rst, agent_rst))
+    ''', (user_id, title, content, content_summary, crawled_keywords, crawled_summary, int(RAG_rst*100), int(agent_rst*100)))
 
     conn.commit()
     conn.close()

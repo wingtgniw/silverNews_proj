@@ -101,7 +101,9 @@ class NewsletterGenerator:
 
         ## 그래프 반환
         return graph.compile()
-    
+
+
+### 기사 정리 그래프
 # class ArticleEditor:
 #     def __init__(self):
 #         self.llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
