@@ -92,7 +92,7 @@ def show_articles():
                         RAG_rst = st.session_state["RAG_reviewer"].get_review(newsletter_rst['newsletter'])
                         agent_rst = st.session_state["agent_reviewer"].get_review(newsletter_rst['newsletter'])
                         # st.write(f"RAG 결과: {RAG_rst}")
-                        st.write(f"Agent 결과: {agent_rst}")
+                        # st.write(f"Agent 결과: {agent_rst}")
 
                     insert_newsletter(user_id, newsletter_rst, RAG_rst, agent_rst)
                     st.success("뉴스레터가 작성되었습니다.")
