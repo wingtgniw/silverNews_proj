@@ -14,7 +14,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
-
+from reader import save_audio, read_text
 
 def is_korean(text):
     return bool(re.search(r"[가-힣]", text))
@@ -77,25 +77,34 @@ def show_articles():
     if files:
         # chat gpt turbo 3.5 모델 사용
         for i, file in enumerate(files):
+            
             if "usatoday" not in file:
                 continue
             with open(file, "r", encoding="utf-8") as f:
                 article = json.load(f)
             
+            save_audio(article['content_kr'], f"{i}.mp3", "article")
+
             # st.write(article['title'])
             with st.expander(article['title']):
-                button = st.button("뉴스레터 작성", key=f"button_{i}")
+                col1, col2 = st.columns(2)
+                with col1:
+                    write_button = st.button("📝 작성", key=f"write_button_{i}")
+                with col2:
+                    play_button = st.button("📢 읽기", key=f"play_button_{i}")
 
-                if button:
+                if play_button:
+                    read_text(f"{i}.mp3", "article")
+
+                if write_button:
                     with st.spinner("뉴스레터 작성 중..."):
                         newsletter_rst = generator.generate_newsletter_from_article(article['content_en'])
                         RAG_rst = st.session_state["RAG_reviewer"].get_review(newsletter_rst['newsletter'])
                         agent_rst = st.session_state["agent_reviewer"].get_review(newsletter_rst['newsletter'])
-                        # st.write(f"RAG 결과: {RAG_rst}")
-                        # st.write(f"Agent 결과: {agent_rst}")
 
                     insert_newsletter(user_id, newsletter_rst, RAG_rst, agent_rst)
                     st.success("뉴스레터가 작성되었습니다.")
+                    
 
                 st.write("원문:")
                 st.write(article['url'])
@@ -120,38 +129,31 @@ def newsletter_page():
     newsletters = get_all_newsletters(st.session_state["sender_email"])
     if newsletters:
         for i, newsletter in enumerate(newsletters):
+            
+            # 뉴스레터 오디오 저장
+            save_audio(newsletter['content'], f"{newsletter['id']}.mp3", "newsletter")
+            
             # 특정 뉴스레터로 이동
-            if target_newsletter_id and str(newsletter['id']) == target_newsletter_id:
+            if target_newsletter_id:# and str(newsletter['id']) == target_newsletter_id:
                 st.session_state['expand_newsletter_' + str(i)] = True
             
             with st.expander(f"{newsletter['title']} ({newsletter['created_at']})", 
                            expanded=st.session_state.get('expand_newsletter_' + str(i), False)):
                 receiver_email = st.text_input("받으실 분 이메일", key=f"receiver_email_{i}")
-                button = st.button("메일 발송", key=f"button_{i}")
-                
-                if button:
-                    if receiver_email == "":
-                        st.error("수신자를 입력해주세요.")
-                        
-                        newsletter_expanded_page(newsletter)
-                        continue
-                    elif "@" not in receiver_email:
-                        st.error("올바른 이메일을 입력해주세요.")
+                col1, col2 = st.columns(2)
+                with col1:
+                    send_button = st.button("📧 공유", key=f"send_button_{i}")
+                with col2:
+                    play_button = st.button("📢 읽기", key=f"play_button_{i}")
 
-                        newsletter_expanded_page(newsletter)
-                        continue
+                if play_button:
+                    read_text(f"{newsletter['id']}.mp3", "newsletter")
+                
+                if send_button:
 
                     with st.spinner("전송중..."):
-                        print("send_email")
-                        print(f"send_email ---- title: {newsletter['title']}")
-                        print(f"send_email ---- receiver_email: {receiver_email}")
-
                         sender_email = st.session_state["sender_email"]
                         password = st.session_state["email_password"]
-
-                        print(f"send_email ---- sender_email: {sender_email}")
-                        print(f"send_email ---- password: {password}")
-                        print(f"send_email ---- receiver_email: {receiver_email}")
 
                         msg = MIMEMultipart()
                         msg["Subject"] = "[뉴스레터 발송] Silver News에서 새로운 뉴스레터가 작성되었습니다."
@@ -190,6 +192,7 @@ def newsletter_page():
         st.info("뉴스레터가 없습니다.")
 
 def newsletter_expanded_page(newsletter):
+
     st.markdown("---")
     st.write("키워드:")
     st.write(newsletter['crawled_keywords'])

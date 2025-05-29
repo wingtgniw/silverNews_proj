@@ -5,6 +5,9 @@ test/
 # DB
 /DB/silverNews.db
 
+# audio
+/audio/
+
 #saved articles file
 /saved_articles/
 /saved_articles_kr/
