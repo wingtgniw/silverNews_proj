@@ -52,8 +52,7 @@ def init_read_manager_session_state():
     if st.session_state.get("read_manager") is None:
         st.session_state["read_manager"] = ReadManager()
     
-    if st.session_state["read_manager"].clicked_play_button_key is None:
-        st.session_state["read_manager"].stop_read_text()
+    st.session_state["read_manager"].stop_read_text()
 
     return st.session_state["read_manager"]
 
@@ -97,12 +96,11 @@ def articles_page():
                 with col1:
                     write_button = st.button("📝 작성", key=f"write_button_{i}")
                 with col2:
-                    play_button = st.button("📢 읽기", key=f"play_button_{i}")
+                    read_button_key = f"read_button_{i}"
+                    read_button = st.button("📢 읽기", key=read_button_key)
 
-                if play_button:
-                    st.write(f"ReadManager ---- playing file name:{read_manager.played_file_name}")
-                    read_manager.read_text(f"{i}.mp3", "article")
-
+                if read_button: read_manager.read_text(f"{i}.mp3", "article", read_button_key)
+                    
                 if write_button:
                     with st.spinner("뉴스레터 작성 중..."):
                         newsletter_rst = generator.generate_newsletter_from_article(article['content_en'])
@@ -111,15 +109,16 @@ def articles_page():
 
                     insert_newsletter(user_id, newsletter_rst, RAG_rst, agent_rst)
                     st.success("뉴스레터가 작성되었습니다.")
-                    
 
-                st.write("원문:")
-                st.write(article['url'])
-                st.write("기사 내용:")
-                st.write(article['content_kr'])
-
+                article_expanded_page(article)
     else:
         st.info("아직 크롤링된 기사가 없습니다.")
+
+def article_expanded_page(article):
+    st.write("원문:")
+    st.write(article['url'])
+    st.write("기사 내용:")
+    st.write(article['content_kr'])
 
 def newsletter_page():
     st.title("뉴스레터")
@@ -137,7 +136,6 @@ def newsletter_page():
     if newsletters:
         read_manager = init_read_manager_session_state()
 
-        is_play_button_clicked = False
         for i, newsletter in enumerate(newsletters):
             
             # 뉴스레터 오디오 저장
@@ -154,21 +152,11 @@ def newsletter_page():
                 with col1:
                     send_button = st.button("📧 공유", key=f"send_button_{i}")
                 with col2:
-                    play_button_key = f"play_button_{i}"
-                    play_button = st.button("📢 읽기", key=play_button_key)
+                    read_button_key = f"read_button_{i}"
+                    read_button = st.button("📢 읽기", key=read_button_key)
 
-                if play_button:
-                    read_manager.read_text(f"{newsletter['id']}.mp3", "newsletter")
+                if read_button: read_manager.read_text(f"{newsletter['id']}.mp3", "newsletter", read_button_key)
 
-                    st.session_state["read_manager"].clicked_play_button_key = play_button_key
-                    is_play_button_clicked = True
-                else:
-                    if is_play_button_clicked:
-                        newsletter_expanded_page(newsletter)
-                        continue
-
-                    st.session_state["read_manager"].clicked_play_button_key = None
-                
                 if send_button:
 
                     with st.spinner("전송중..."):
