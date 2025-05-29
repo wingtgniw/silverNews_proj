@@ -1,7 +1,7 @@
 from openai import OpenAI
-import openai
-import os
+import multiprocessing, openai, os
 from playsound import playsound
+import streamlit as st
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -25,5 +25,34 @@ def save_audio(text, file_name, news_type):
     with open(save_path, 'wb') as fp:
         fp.write(response.content)
 
-def read_text(file_name, news_type):
-    playsound(os.path.join(*[audio_path, news_type, file_name]))
+class ReadManager:
+    def __init__(self):
+        self.played_process = None
+        self.played_file_name = None
+        self.clicked_play_button_key = None
+
+    def read_text(self, file_name, news_type):
+        if self.played_process is not None:
+            
+            if self.played_file_name == file_name:
+                print(f"ReadManager ---- {file_name} is already playing")
+                self.stop_read_text()
+                return
+            else:
+                self.stop_read_text()
+
+        p = multiprocessing.Process(target=playsound, args=(os.path.join(*[audio_path, news_type, file_name]),))
+        p.start()
+
+        self.played_process = p
+        self.played_file_name = file_name
+
+    def stop_read_text(self):
+        if self.played_process is not None:
+            try:
+                self.played_process.terminate()
+            except Exception as e:
+                print(f"Error stopping audio: {str(e)}")
+            finally:
+                self.played_process = None
+                self.played_file_name = None

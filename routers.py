@@ -6,15 +6,10 @@ from RAG import RAGReviewer
 from agent import AgentReviewer
 from DocBotCrawler.run_crawler import NewsCrawlerRunner
 from glob import glob
-import json
-import re
-import time
-from datetime import datetime
-import smtplib
+import json, os, re, smtplib, time
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import os
-from reader import save_audio, read_text
+from reader import save_audio, ReadManager
 
 def is_korean(text):
     return bool(re.search(r"[가-힣]", text))
@@ -53,7 +48,16 @@ def crawling_articles_page():
 
         st.success("기사들이 크롤링 되었습니다.")
 
-def show_articles():
+def init_read_manager_session_state():
+    if st.session_state.get("read_manager") is None:
+        st.session_state["read_manager"] = ReadManager()
+    
+    if st.session_state["read_manager"].clicked_play_button_key is None:
+        st.session_state["read_manager"].stop_read_text()
+
+    return st.session_state["read_manager"]
+
+def articles_page():
 
     st.title("기사 보기")
 
@@ -75,6 +79,8 @@ def show_articles():
     user_id = st.session_state["sender_email"] if st.session_state.get("sender_email") is not None else "wingtgniw@gmail.com"
         
     if files:
+        read_manager = init_read_manager_session_state()
+
         # chat gpt turbo 3.5 모델 사용
         for i, file in enumerate(files):
             
@@ -94,7 +100,8 @@ def show_articles():
                     play_button = st.button("📢 읽기", key=f"play_button_{i}")
 
                 if play_button:
-                    read_text(f"{i}.mp3", "article")
+                    st.write(f"ReadManager ---- playing file name:{read_manager.played_file_name}")
+                    read_manager.read_text(f"{i}.mp3", "article")
 
                 if write_button:
                     with st.spinner("뉴스레터 작성 중..."):
@@ -128,6 +135,9 @@ def newsletter_page():
     # 뉴스레터 목록 조회
     newsletters = get_all_newsletters(st.session_state["sender_email"])
     if newsletters:
+        read_manager = init_read_manager_session_state()
+
+        is_play_button_clicked = False
         for i, newsletter in enumerate(newsletters):
             
             # 뉴스레터 오디오 저장
@@ -144,10 +154,20 @@ def newsletter_page():
                 with col1:
                     send_button = st.button("📧 공유", key=f"send_button_{i}")
                 with col2:
-                    play_button = st.button("📢 읽기", key=f"play_button_{i}")
+                    play_button_key = f"play_button_{i}"
+                    play_button = st.button("📢 읽기", key=play_button_key)
 
                 if play_button:
-                    read_text(f"{newsletter['id']}.mp3", "newsletter")
+                    read_manager.read_text(f"{newsletter['id']}.mp3", "newsletter")
+
+                    st.session_state["read_manager"].clicked_play_button_key = play_button_key
+                    is_play_button_clicked = True
+                else:
+                    if is_play_button_clicked:
+                        newsletter_expanded_page(newsletter)
+                        continue
+
+                    st.session_state["read_manager"].clicked_play_button_key = None
                 
                 if send_button:
 

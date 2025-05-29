@@ -5,7 +5,7 @@ load_dotenv()
 import streamlit as st
 from streamlit_option_menu import option_menu
 from DB import init_db
-from routers import show_articles, crawling_articles_page, newsletter_page
+from routers import articles_page, crawling_articles_page, newsletter_page
 from streamlit_page.chat_page import chat_page
 # from fact_checker import agent
 
@@ -13,8 +13,6 @@ from streamlit_page.chat_page import chat_page
 if st.session_state.get("DB") is None:
     init_db()
     st.session_state["init_db"] = True
-    st.session_state["use_reranker"] = True
-    # st.session_state["fact_checker"] = agent
 
 # URL 파라미터 확인
 if "id" in st.query_params:
@@ -31,7 +29,7 @@ with st.sidebar:
 if menu == "크롤링":
     crawling_articles_page()
 elif menu == "기사":
-    show_articles()
+    articles_page()
 elif menu == "뉴스레터":
     newsletter_page()
 elif menu == "아카이브":
