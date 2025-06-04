@@ -78,7 +78,8 @@ def articles_page():
     user_id = st.session_state["sender_email"] if st.session_state.get("sender_email") is not None else "wingtgniw@gmail.com"
         
     if files:
-        read_manager = init_read_manager_session_state()
+        # 기사 길이 조절 필요, max length = 4096
+        # read_manager = init_read_manager_session_state()
 
         # chat gpt turbo 3.5 모델 사용
         for i, file in enumerate(files):
@@ -87,8 +88,9 @@ def articles_page():
                 continue
             with open(file, "r", encoding="utf-8") as f:
                 article = json.load(f)
-            
-            save_audio(article['content_kr'], f"{i}.mp3", "article")
+
+            # 기사 길이 조절 필요, max length = 4096
+            # save_audio(article['content_kr'], f"{i}.mp3", "article")
 
             # st.write(article['title'])
             with st.expander(article['title']):
@@ -99,7 +101,9 @@ def articles_page():
                     read_button_key = f"read_button_{i}"
                     read_button = st.button("📢 읽기", key=read_button_key)
 
-                if read_button: read_manager.read_text(f"{i}.mp3", "article", read_button_key)
+                if read_button: 
+                    print('기사 길이 조절 필요, max length = 4096')
+                    # read_manager.read_text(f"{i}.mp3", "article", read_button_key)
                     
                 if write_button:
                     with st.spinner("뉴스레터 작성 중..."):
@@ -176,7 +180,7 @@ def newsletter_page():
                         msg.attach(content_part)
 
                         # 뉴스레터 링크 수정
-                        base_url = os.getenv("BASE_URL", "http://192.168.0.166:8501")
+                        base_url = os.getenv("BASE_URL", "http://localhost:8501")
                         newsletter_link = f"{base_url}/?menu=뉴스레터&id={newsletter['id']}"
 
                         # 메일 내용에 링크 삽입
@@ -210,14 +214,14 @@ def newsletter_expanded_page(newsletter):
     st.markdown("---")
     st.write("RAG 결과:")
     st.write("점수: {}".format(newsletter['r_score']))
-    if newsletter['r_score'] <= 0.6:
+    if newsletter['r_score'] <= 60:
         st.warning("데이터 베이스와 연관성이 적은 뉴스레터입니다.")
     else:
         st.success("데이터 베이스와 연관성이 높은 뉴스레터입니다.")
     st.markdown("---")
     st.write("에이전트 결과:")
     st.write("점수: {}".format(newsletter['a_score']))
-    if newsletter['a_score'] <= 0.6:
+    if newsletter['a_score'] <= 60:
         st.warning("wikipedia 정보와 연관성이 적은 뉴스레터입니다.")
     else:
         st.success("wikipedia 정보와 연관성이 높은 뉴스레터입니다.")

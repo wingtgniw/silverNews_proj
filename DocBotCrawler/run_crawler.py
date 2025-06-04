@@ -14,7 +14,7 @@ from .news_translator.translator import kor_to_eng  # 상위 모듈
 class NewsCrawlerRunner:
     def __init__(self):
         self.crawlers = [
-            crawl_cnn_articles,
+            # crawl_cnn_articles,
             crawl_usatoday_articles,
             crawl_wikipedia
         ]

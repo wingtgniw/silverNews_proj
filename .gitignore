@@ -4,15 +4,21 @@ test/
 
 # DB
 /DB/silverNews.db
+/DB/silverNews.db.back
 
 # audio
 /audio/
+
+#video
+/video/
 
 #saved articles file
 /saved_articles/
 /saved_articles_kr/
 /saved_articles_json/
-
+/saved_articles_back/
+/saved_articles_kr_back/
+/saved_articles_json_back/
 
 #env
 .env
